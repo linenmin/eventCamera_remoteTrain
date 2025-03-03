@@ -111,8 +111,7 @@ def train():
     random.seed(seed)
 
     data_paths = {
-        "timeStack1281281": "/content/timeStack_data_1281281",
-        "timeStack1281283": "/content/timeStack_data_1281283"
+        "timeStack1281281": "./data/timeStack_data_1281281"
     }
     data_name = config.get("data_name", "timeStack1281281")
     learning_rate = config.get("learning_rate", 0.0003)
@@ -154,8 +153,8 @@ def train():
             return learning_rate * 0.01
     lr_callback = LearningRateScheduler(scheduler)
 
-    os.makedirs("/content/models", exist_ok=True)
-    checkpoint_path = f"/content/models/best{data_name}_{learning_rate}_{batch_size}_{dropout_rate}_{l2_reg}_mbNetV2.h5"
+    os.makedirs("models", exist_ok=True)
+    checkpoint_path = f"models/best{data_name}_{learning_rate}_{batch_size}_{dropout_rate}_{l2_reg}_mbNetV2.h5"
     early_stop = EarlyStopping(monitor='val_accuracy', min_delta=min_delta, patience=patience, restore_best_weights=True)
     checkpoint = ModelCheckpoint(checkpoint_path, monitor='val_accuracy', save_best_only=True, verbose=1)
 
