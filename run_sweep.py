@@ -18,7 +18,7 @@ sweep_config = {
             "value": 100
         },
         "batch_size": {
-            "values": [16, 12, 8]
+            "values": [64, 32, 16, 12, 8]
         },
         "patience": {
             "value": 100
