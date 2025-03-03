@@ -1,5 +1,5 @@
 import wandb
-import tf2_mbNetV2_train   # 假设 train() 定义在 train.py 中
+import tf2_mbNetV2_train   
 
 sweep_config = {
     "program": "train.py",
