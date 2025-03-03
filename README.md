@@ -6,30 +6,39 @@
 ---
 
 ## 🛠️ 环境安装
-### 1️⃣ 克隆仓库
+### 1. 克隆仓库
 ```bash
 git clone https://github.com/linenmin/eventCamera_remoteTrain.git
 cd eventCamera_remoteTrain
 ```
 
-### 2️⃣ 安装 Python 依赖
+### 2。 安装 Python 依赖
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3️⃣ 下载数据集
+### 3. 下载数据集
 ```bash
 python download_data.py
 ```
 
-### 4️⃣ 解压数据
+### 4. 解压数据
 ```bash
 unzip data/timeStack_data_1281281.zip -d data/
 ```
 
-### 5️⃣ 运行训练脚本
+### 5. 配置 Wandb API 密钥
 ```bash
-python train.py
+export WANDB_API_KEY=你的_wandb_api_key
+```
+或者在 Windows 下：
+```bash
+set WANDB_API_KEY=你的_wandb_api_key
+```
+
+### 6. 运行sweep脚本
+```bash
+python run_sweep.py
 ```
 
 ---
