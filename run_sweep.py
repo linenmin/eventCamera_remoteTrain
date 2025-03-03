@@ -2,7 +2,6 @@ import wandb
 from tf2_mbNetV2_train import train
 
 sweep_config = {
-    "program": "train.py",
     "method": "grid",
     "metric": {
         "name": "val_accuracy",
