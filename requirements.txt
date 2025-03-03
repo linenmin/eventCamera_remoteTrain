@@ -1,1 +1,7 @@
-
+gdown==5.2.0
+h5py==3.12.1
+matplotlib==3.10.0
+numpy==1.26.4
+scikit-learn==1.6.1
+tensorflow==2.18.0
+wandb==0.19.7
