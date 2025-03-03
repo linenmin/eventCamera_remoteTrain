@@ -1,7 +1,8 @@
 # 🚀 eventCamera_remoteTrain
 
 ## 📌 项目介绍
-该项目提供了一套完整的CIFAR10-DVS的时间堆叠表示方法在mobileNetV2中的wandB中sweep搜索的远程训练流程
+本项目基于 TensorFlow 2 和 MobileNetV2 构建了一个用于远程训练的模型，并集成了 wandb 超参搜索功能。数据集存储在 Google Drive，代码中提供了数据下载、训练和超参搜索（sweep）的完整流程。
+数据timeStack_data_1281281通过CIFAR10-DVS的时间堆叠数据表示转化而来,维度是128*128*3
 
 ---
 
@@ -49,11 +50,12 @@ python run_sweep.py
 eventCamera_remoteTrain/
 ├── data/                 (不会上传到 GitHub)
 │   └── (存放解压后的数据)
-├── notebooks/
-│   └── train.ipynb       (Jupyter 训练代码)
+├── models/                 
+│   └── (存放最佳模型)
 ├── download_data.py      (自动下载数据集)
 ├── requirements.txt      (环境依赖)
-├── train.py              (训练脚本)
-├── .gitignore            (忽略大文件)
+├── tf2_mbNetV2_train.py  (训练定义)
+├── run_sweep.py          (搜索训练脚本)
+├── .gitignore            (忽略数据集)
 ├── README.md             (项目说明)
 
