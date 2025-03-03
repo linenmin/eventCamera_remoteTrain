@@ -41,7 +41,7 @@ set WANDB_API_KEY=你的_wandb_api_key
 ```bash
 python run_sweep.py
 ```
-
+训练过程中，最佳模型会保存到 models/ 目录下，文件名形如：models/besttimeStack1281281_<learning_rate>_<batch_size>_<dropout_rate>_<l2_reg>_mbNetV2.h5
 ---
 ---
 
