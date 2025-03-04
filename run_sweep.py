@@ -37,4 +37,4 @@ sweep_config = {
 
 sweep_id = wandb.sweep(sweep_config, project="event_MT_tf2mobileNetV2_sweep")
 print("Created sweep with ID:", sweep_id)
-wandb.agent(sweep_id, function=train, count=24)
+wandb.agent(sweep_id, function=train, count=5)
