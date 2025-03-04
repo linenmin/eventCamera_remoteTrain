@@ -12,13 +12,13 @@ sweep_config = {
             "values": ["timeStack1281281"]
         },
         "learning_rate": {
-            "values": [3e-4, 1e-3]
+            "values": [1e-3]
         },
         "epochs": {
             "value": 100
         },
         "batch_size": {
-            "values": [64, 32, 16, 12, 8]
+            "values": [16, 12, 64, 32,  8]
         },
         "patience": {
             "value": 100
@@ -27,10 +27,10 @@ sweep_config = {
             "value": 0.01
         },
         "dense_dropout": {
-            "values": [0.3, 0.5]
+            "values": [0.5]
         },
         "dense_l2": {
-            "values": [1e-4, 1e-3]
+            "values": [1e-3]
         }
     }
 }
