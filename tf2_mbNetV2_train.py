@@ -130,7 +130,6 @@ def train():
     base_model.trainable = True
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = BatchNormalization()(x)
     x = Dense(128, activation='relu', kernel_regularizer=l2(l2_reg))(x)
     x = Dropout(dropout_rate)(x)
     
