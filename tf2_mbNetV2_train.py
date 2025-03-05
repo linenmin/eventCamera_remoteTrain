@@ -107,7 +107,7 @@ def train():
     random.seed(seed)
 
     data_paths = {
-        "timeStack1281281": "/content/timeStack_data_1281281_tf",
+        "timeStack1281281": "/content/timeStack_1281281_tf",
     }
     data_name = config.get("data_name", "timeStack1281281")
     learning_rate = config.get("learning_rate", 0.0003)
