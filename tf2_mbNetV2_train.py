@@ -31,70 +31,92 @@ class CustomWandbCallback(WandbCallback):
 
 
 # 新增：解析 TFRecord 文件的函数
-def parse_tfrecord_function(file_path, table, num_classes):
-    # 读取TFRecord文件内容
-    raw = tf.io.read_file(file_path)
-    # 定义解析字典
+def parse_tfrecord_function(record, filename, table, num_classes):
+    """
+    解析单个TFRecord记录，并利用文件路径提取标签信息。
+    假设TFRecord中存储了'event_grid'和'shape'两个字段，
+    文件路径格式为 ".../类别名/xxx.tfrecord"，则类别名在倒数第二个位置。
+    """
     features = {
         'event_grid': tf.io.FixedLenFeature([], tf.string),
         'shape': tf.io.FixedLenFeature([3], tf.int64)
     }
-    example = tf.io.parse_single_example(raw, features)
+    # 解析单个样本
+    example = tf.io.parse_single_example(record, features)
     event_grid = tf.io.decode_raw(example['event_grid'], tf.float32)
     shape = example['shape']
     event_grid = tf.reshape(event_grid, shape)
-    
-    # 将图像 resize 到 224×224
     event_grid = tf.image.resize(event_grid, (224, 224))
     event_grid = event_grid / 255.0
 
-    # 提取标签：假设文件路径结构为 .../class_name/filename.tfrecord
-    parts = tf.strings.split(file_path, os.sep)
-    label_str = parts[-2]
+    # 从文件路径中提取标签
+    parts = tf.strings.split(filename, os.sep)
+    label_str = parts[-2]  # 假设类别名在倒数第二个位置
     label_int = table.lookup(label_str)
     label = tf.one_hot(label_int, depth=num_classes)
     return event_grid, label
 
 def create_dataset_tf2(data_dir, batch_size, seed=42):
-    # 获取所有 .tfrecord 文件，并过滤掉包含 ".ipynb_checkpoints" 的文件
+    """
+    构建 TFRecord 数据集：
+    - 使用 glob 获取所有 TFRecord 文件（排除 .ipynb_checkpoints 文件夹下的文件）
+    - 根据父文件夹名称（类别名）做分层抽样
+    - 利用 tf.data.TFRecordDataset 读取每个文件，并通过 interleave 方式将文件名附带到每条记录中
+    - 最后 map 到解析函数中
+    """
+    # 获取所有TFRecord文件
     all_files = glob.glob(os.path.join(data_dir, "*/*.tfrecord"))
     all_files = [f for f in all_files if ".ipynb_checkpoints" not in f]
 
-    # 获取有效类别列表（从父文件夹名称获取），并排序
+    # 获取有效类别（文件夹名称）并排序
     valid_classes = sorted([cls for cls in os.listdir(data_dir)
                              if os.path.isdir(os.path.join(data_dir, cls)) and cls != '.ipynb_checkpoints'])
-
     print("有效类别:", valid_classes)
 
-    # 构造类别映射查找表
+    # 构造类别查找表
     keys = tf.constant(valid_classes)
     vals = tf.constant(range(len(valid_classes)), dtype=tf.int32)
     table = tf.lookup.StaticHashTable(
         tf.lookup.KeyValueTensorInitializer(keys, vals), default_value=-1)
     num_classes = len(valid_classes)
 
-    # 获取每个文件对应的类别（父目录名称）
+    # 根据文件的父目录名称获取标签信息，用于 stratified 分层抽样
     labels = [os.path.basename(os.path.dirname(f)) for f in all_files]
 
-    # stratified 分层划分
+    # 分层划分训练集和验证集
     train_files, val_files = train_test_split(
         all_files, test_size=0.2, random_state=seed, stratify=labels)
-
+    
     print("训练集样本数量:", len(train_files))
     print("验证集样本数量:", len(val_files))
     print("训练集类别分布:", Counter([os.path.basename(os.path.dirname(f)) for f in train_files]))
     print("验证集类别分布:", Counter([os.path.basename(os.path.dirname(f)) for f in val_files]))
 
-    # 构建 tf.data.Dataset
+    # 定义一个函数：读取每个文件的TFRecord，并附带文件名信息
+    def process_file(filename):
+        ds = tf.data.TFRecordDataset(filename)
+        # 将每个记录和对应的文件名打包在一起
+        ds = ds.map(lambda record: (record, filename))
+        return ds
+
+    # 构建训练集
     train_ds = tf.data.Dataset.from_tensor_slices(train_files)
-    train_ds = train_ds.map(lambda x: parse_tfrecord_function(x, table, num_classes),
-                             num_parallel_calls=tf.data.AUTOTUNE)
+    train_ds = train_ds.interleave(lambda x: process_file(x),
+                                   cycle_length=tf.data.AUTOTUNE,
+                                   block_length=1)
+    train_ds = train_ds.map(lambda record, filename: parse_tfrecord_function(record, filename, table, num_classes),
+                            num_parallel_calls=tf.data.AUTOTUNE)
     train_ds = train_ds.shuffle(1000, seed=seed).batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
 
+    # 构建验证集
     val_ds = tf.data.Dataset.from_tensor_slices(val_files)
-    val_ds = val_ds.map(lambda x: parse_tfrecord_function(x, table, num_classes),
-                         num_parallel_calls=tf.data.AUTOTUNE)
+    val_ds = val_ds.interleave(lambda x: process_file(x),
+                               cycle_length=tf.data.AUTOTUNE,
+                               block_length=1)
+    val_ds = val_ds.map(lambda record, filename: parse_tfrecord_function(record, filename, table, num_classes),
+                        num_parallel_calls=tf.data.AUTOTUNE)
     val_ds = val_ds.batch(batch_size, drop_remainder=False).prefetch(tf.data.AUTOTUNE)
+    
     return train_ds, val_ds
 
 def train():
