@@ -11,4 +11,4 @@ os.makedirs("data", exist_ok=True)
 # 下载数据集
 gdown.download(f"https://drive.google.com/uc?id={FILE_ID}", OUTPUT_PATH, quiet=False)
 
-print("数据下载完成！请手动解压 data/timeStack_data_1281281.zip")
+print("数据下载完成！请手动解压 data/timeStack_1281281_tf.zip")
